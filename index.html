@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instagram Video Downloader</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 50px; text-align: center; }
+    .container { background: #fff; padding: 30px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: #3897f0; color: #fff; border: none; padding: 10px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    #result { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Instagram Video Downloader</h2>
+    <input type="text" id="videoUrl" placeholder="Paste Instagram video URL" />
+    <button onclick="fetchVideo()">Download</button>
+    <div id="result"></div>
+  </div>
+  <script>
+    async function fetchVideo() {
+      const url = document.getElementById('videoUrl').value;
+      const result = document.getElementById('result');
+      if (!url.includes('instagram.com')) {
+        result.innerHTML = "<p style='color:red;'>Enter a valid Instagram URL.</p>";
+        return;
+      }
+      result.innerHTML = "Loading...";
+      try {
+        const res = await fetch('/api/download?url=${encodeURIComponent(url)}');
+        const data = await res.json();
+        if (data.videoUrl) {
+          result.innerHTML = `
+            <video width="100%" controls>
+              <source src="${data.videoUrl}" type="video/mp4">
+              Your browser doesn’t support video playback.
+            </video>
+            <br><a href="${data.videoUrl}" download><button>Download Video</button></a>`;
+        } else {
+          result.innerHTML = <p style="color:red;">${data.error || 'Unknown error'}</p>;
+        }
+      } catch (e) {
+        console.error(e);
+        result.innerHTML = "<p style='color:red;'>Fetch error</p>";
+      }
+    }
+  </script>
+</body>
+</html>
